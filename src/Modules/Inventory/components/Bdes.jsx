@@ -24,7 +24,9 @@ export default function Inventory() {
   const [inventoryData, setInventoryData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const departments = [
+  const [departments, setDepartment] = useState([]);
+
+  const departments2 = [
     { label: "CSE", value: "CSE" },
     { label: "ECE", value: "ECE" },
     { label: "ME", value: "ME" },
@@ -57,6 +59,14 @@ export default function Inventory() {
   useEffect(() => {
     if (!selectedDepartment && !isDefaultRole) {
       setSelectedDepartment(getDepartmentLabel());
+    }
+
+    if (isDefaultRole) {
+      setDepartment(departments2);
+    } else {
+      const arr = [];
+      arr.push(getDepartmentLabel());
+      setDepartment(arr);
     }
   }, [role, selectedDepartment, isDefaultRole]);
 
