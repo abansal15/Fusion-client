@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useState } from "react";
 import {
   Table,
@@ -12,10 +14,9 @@ import {
   Button,
 } from "@mantine/core";
 
-import AddProduct from './AddProduct'; 
-import TransferProduct from './TransferProduct'; 
+import AddProduct from "./AddProduct";
+import TransferProduct from "./TransferProduct";
 import "../styles/popupModal.css";
-
 
 const data = [
   {
@@ -100,8 +101,9 @@ const data = [
 export default function Inventory() {
   const [selectedCategory, setSelectedCategory] = useState("CSE");
   const [sortOption, setSortOption] = useState("Last Updated");
-  const [showAddProductModal, setShowAddProductModal] = useState(false); 
-  const [showTransferProductModal, setShowTransferProductModal] = useState(false); 
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showTransferProductModal, setShowTransferProductModal] =
+    useState(false);
 
   const categories = [
     { label: "CSE", value: "CSE" },
@@ -150,21 +152,21 @@ export default function Inventory() {
       )}
     </React.Fragment>
   ));
- 
+
   const openAddProductModal = () => {
-    setShowAddProductModal(true);  // Show the modal when "Add Product" is clicked
+    setShowAddProductModal(true); // Show the modal when "Add Product" is clicked
   };
 
   const closeAddProductModal = () => {
-    setShowAddProductModal(false);  // Close the modal when needed
+    setShowAddProductModal(false); // Close the modal when needed
   };
-  
+
   const openTransferProductModal = () => {
-    setShowTransferProductModal(true);  // Show the modal when "Add Product" is clicked
+    setShowTransferProductModal(true); // Show the modal when "Add Product" is clicked
   };
 
   const closeTransferProductModal = () => {
-    setShowTransferProductModal(false);  // Close the modal when needed
+    setShowTransferProductModal(false); // Close the modal when needed
   };
 
   return (
@@ -217,7 +219,12 @@ export default function Inventory() {
               30252
             </Badge>
           </div>
-          <Button color="blue" size="lg" style={{ marginLeft: "auto" }} onClick={openTransferProductModal}>
+          <Button
+            color="blue"
+            size="lg"
+            style={{ marginLeft: "auto" }}
+            onClick={openTransferProductModal}
+          >
             Transfer Product
           </Button>
         </Group>
@@ -252,12 +259,17 @@ export default function Inventory() {
                 {category.label}
               </Tabs.Tab>
             ))}
-          
 
-            <Button className="button-blue" style={{ marginLeft: "auto" }} onClick={openAddProductModal}>
+            <Button
+              className="button-blue"
+              style={{ marginLeft: "auto" }}
+              onClick={openAddProductModal}
+            >
               Add Product
             </Button>
-            <Button className="button-blue" style={{ marginLeft: "10px" }}>Filters</Button>
+            <Button className="button-blue" style={{ marginLeft: "10px" }}>
+              Filters
+            </Button>
           </Tabs.List>
 
           <Group position="apart" style={{ marginBottom: "10px" }}>
@@ -347,29 +359,32 @@ export default function Inventory() {
           </Group>
         </Tabs>
       </Paper>
-    
+
       {showAddProductModal && (
         <>
-           <div className="overlay" onClick={closeAddProductModal}></div>
-           <div className="modal">
-             <button className="close-button" onClick={closeAddProductModal}>
-               X
-             </button>
-             <AddProduct /> 
-           </div>
-         </>
-       )}
-         {showTransferProductModal && (
+          <div className="overlay" onClick={closeAddProductModal} />
+          <div className="modal">
+            <button className="close-button" onClick={closeAddProductModal}>
+              X
+            </button>
+            <AddProduct />
+          </div>
+        </>
+      )}
+      {showTransferProductModal && (
         <>
-           <div className="overlay" onClick={closeTransferProductModal}></div>
-           <div className="modal">
-             <button className="close-button" onClick={closeTransferProductModal}>
-               X
-             </button>
-             <TransferProduct /> 
-           </div>
-         </>
-       )}
+          <div className="overlay" onClick={closeTransferProductModal} />
+          <div className="modal">
+            <button
+              className="close-button"
+              onClick={closeTransferProductModal}
+            >
+              X
+            </button>
+            <TransferProduct />
+          </div>
+        </>
+      )}
     </Container>
   );
 }
