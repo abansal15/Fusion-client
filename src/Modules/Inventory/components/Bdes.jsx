@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Table,
-  Container,
-  Group,
-  Button,
-  Text,
-  ScrollArea,
-  Select,
-} from "@mantine/core";
+import { Table, Container, Group, Button, Text, ScrollArea, Select } from "@mantine/core";
 import { useSelector } from "react-redux";
 import AddProduct from "./AddProduct";
 import TransferProduct from "./TransferProduct";
@@ -18,15 +10,14 @@ import { InventoryDepartments } from "../../../routes/inventoryRoutes";
 export default function Inventory() {
   const role = useSelector((state) => state.user.role);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
-  const [showTransferProductModal, setShowTransferProductModal] =
-    useState(false);
+  const [showTransferProductModal, setShowTransferProductModal] = useState(false);
   const [showRequestProductModal, setShowRequestProductModal] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [inventoryData, setInventoryData] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Dropdown options
   const [departments, setDepartment] = useState([]);
-
   const departments2 = [
     { label: "CSE", value: "CSE" },
     { label: "ECE", value: "ECE" },
@@ -36,7 +27,6 @@ export default function Inventory() {
     { label: "Design", value: "Design" },
   ];
 
-  // Helper function to return the auto-assigned department based on role
   const getDepartmentLabel = () => {
     if (role === "deptadmin_cse") return "CSE";
     if (role === "deptadmin_ece" || role === "Junior Technician") return "ECE";
@@ -46,122 +36,89 @@ export default function Inventory() {
     return "";
   };
 
-  // Determine if the user has a default role (full UI) or not (auto‑assigned dept)
-  const isDefaultRole = !(
-    role === "deptadmin_cse" ||
-    role === "deptadmin_ece" ||
-    role === "Junior Technician" ||
-    role === "deptadmin_me" ||
-    role === "deptadmin_sm" ||
-    role === "deptadmin_design"
-  );
+  const isDefaultRole = ![
+    "deptadmin_cse",
+    "deptadmin_ece",
+    "Junior Technician",
+    "deptadmin_me",
+    "deptadmin_sm",
+    "deptadmin_design",
+  ].includes(role);
 
-  // Auto-set the department for non-default roles if not already set
   useEffect(() => {
     if (!selectedDepartment && !isDefaultRole) {
       setSelectedDepartment(getDepartmentLabel());
     }
-
     if (isDefaultRole) {
       setDepartment(departments2);
     } else {
-      const arr = [];
-      arr.push(getDepartmentLabel());
-      setDepartment(arr);
+      setDepartment([{ label: getDepartmentLabel(), value: getDepartmentLabel() }]);
     }
   }, [role, selectedDepartment, isDefaultRole]);
 
   const fetchDepartmentData = async () => {
     const token = localStorage.getItem("authToken");
-
     if (!token) {
-      alert("Please log in to add a product");
+      alert("Please log in to view inventory");
       return;
     }
-
     setLoading(true);
     try {
-      const response = await fetch(
-        InventoryDepartments(`${selectedDepartment}`),
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch department data");
-      }
-
-      const data = await response.json();
-      console.log("Department data:", data);
+      const res = await fetch(InventoryDepartments(selectedDepartment), {
+        method: "GET",
+        headers: { Authorization: `Token ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch department data");
+      const data = await res.json();
       setInventoryData(data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching department data:", error);
+    } catch (err) {
+      console.error(err);
+      alert("Error loading inventory");
+    } finally {
       setLoading(false);
     }
   };
 
-  // Fetch data when selectedDepartment is set/changed
   useEffect(() => {
-    if (selectedDepartment) {
-      fetchDepartmentData();
-    }
+    if (selectedDepartment) fetchDepartmentData();
   }, [selectedDepartment]);
 
-  // Modal open/close functions
+  // centralized cell style
+  const tdStyle = {
+    padding: "15px",
+    border: "1px solid #ddd",
+    textAlign: "center",
+  };
+
+  // modal controls
   const openAddProductModal = () => setShowAddProductModal(true);
   const closeAddProductModal = () => setShowAddProductModal(false);
-
-  const openTransferProductModal = () => setShowTransferProductModal(true);
-  const closeTransferProductModal = () => setShowTransferProductModal(false);
-
-  const openRequestProductModal = () => setShowRequestProductModal(true);
-  const closeRequestProductModal = () => setShowRequestProductModal(false);
+  const openTransferModal = () => setShowTransferProductModal(true);
+  const closeTransferModal = () => setShowTransferProductModal(false);
+  const openRequestModal = () => setShowRequestProductModal(true);
+  const closeRequestModal = () => setShowRequestProductModal(false);
 
   return (
     <>
-      {/* Breadcrumb */}
-      <Text style={{ marginLeft: "70px", fontSize: "16px" }} color="dimmed">
+      <Text style={{ marginLeft: 70, fontSize: 16 }} color="dimmed">
         <span
           style={{ cursor: "pointer" }}
           role="button"
-          tabIndex={0}
           onClick={() => setSelectedDepartment("")}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              setSelectedDepartment("");
-            }
-          }}
         >
           Departments
-        </span>
-        {" > "} <span>{selectedDepartment}</span>
+        </span>{" > "}
+        <span>{selectedDepartment}</span>
       </Text>
 
-      <Container
-        style={{
-          maxWidth: "1000px",
-          maxHeight: "1000px",
-          padding: "20px",
-        }}
-      >
+      <Container style={{ maxWidth: 1000, padding: 20 }}>
         <Text
           align="center"
-          style={{
-            fontSize: "26px",
-            marginBottom: "20px",
-            fontWeight: 600,
-            color: "#228BE6",
-          }}
+          style={{ fontSize: 26, marginBottom: 20, fontWeight: 600, color: "#228BE6" }}
         >
-          {selectedDepartment} Department Inventory
+          {selectedDepartment || "All"} Department Inventory
         </Text>
 
-        {/* Dropdown for department selection */}
         <Select
           placeholder="Select Department"
           data={departments}
@@ -170,112 +127,54 @@ export default function Inventory() {
           style={{ width: "90%", margin: "0 auto 20px auto" }}
         />
 
-        {/* Action Buttons */}
         {isDefaultRole ? (
-          <Group
-            position="center"
-            style={{
-              marginBottom: "20px",
-              gap: "10px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Button
-              variant="filled"
-              color="blue"
-              onClick={openTransferProductModal}
-              size="md"
-            >
-              Transfer Item
-            </Button>
-            <Button
-              variant="filled"
-              color="blue"
-              onClick={openAddProductModal}
-              size="md"
-            >
-              Add Product
-            </Button>
+          <Group position="center" style={{ marginBottom: 20, gap: 10 }}>
+            <Button onClick={openTransferModal}>Transfer Item</Button>
+            <Button onClick={openAddProductModal}>Add Product</Button>
           </Group>
         ) : (
-          <Group position="center" style={{ marginBottom: "20px" }}>
-            <Button
-              variant="filled"
-              color="blue"
-              onClick={openRequestProductModal}
-              size="md"
-            >
-              Request Product
-            </Button>
+          <Group position="center" style={{ marginBottom: 20, gap: 10 }}>
+            <Button onClick={openAddProductModal}>Add Product</Button>
+            <Button onClick={openRequestModal}>Request Product</Button>
           </Group>
         )}
 
-        {/* Inventory Table */}
-        <ScrollArea style={{ width: "80%", margin: "0 auto" }}>
-          <Table
-            style={{
-              width: "100%",
-              border: "1px solid #ddd",
-              borderCollapse: "collapse",
-            }}
-          >
+        <ScrollArea style={{ width: "100%", margin: "0 auto" }}>
+          <Table>
             <thead>
-              <tr
-                style={{
-                  backgroundColor: "#f0f0f0",
-                  borderBottom: "2px solid #ddd",
-                }}
-              >
-                <th style={{ padding: "15px", border: "1px solid #ddd" }}>
-                  Item
-                </th>
-                <th style={{ padding: "15px", border: "1px solid #ddd" }}>
-                  Quantity
-                </th>
+              <tr style={{ backgroundColor: "#f0f0f0" }}>
+                <th style={tdStyle}>Item</th>
+                <th style={tdStyle}>Quantity</th>
+                <th style={tdStyle}>Indent ID</th>
+                <th style={tdStyle}>Specifications</th>
+                <th style={tdStyle}>Date</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={2}
-                    style={{
-                      textAlign: "center",
-                      padding: "20px",
-                      fontSize: "16px",
-                      color: "#666",
-                    }}
-                  >
+                  <td colSpan={5} style={{ ...tdStyle, fontSize: 16, color: "#666" }}>
                     Loading data...
                   </td>
                 </tr>
               ) : (
-                inventoryData.map((item, index) => (
+                inventoryData.map((item, idx) => (
                   <tr
-                    key={index}
-                    style={{
-                      borderBottom: "1px solid #ddd",
-                      backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#fff",
-                    }}
+                    key={idx}
+                    style={{ backgroundColor: idx % 2 === 0 ? "#f9f9f9" : "#fff" }}
                   >
-                    <td
-                      style={{
-                        padding: "15px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                      }}
-                    >
-                      {item.item_name}
+                    <td style={tdStyle}>{item.item_name}</td>
+                    <td style={tdStyle}>{item.quantity}</td>
+                    <td style={tdStyle}>{item.indent_id ?? "—"}</td>
+                    <td style={tdStyle}>
+                      {item.specifications?.length > 50
+                        ? item.specifications.slice(0, 50) + "…"
+                        : item.specifications || "—"}
                     </td>
-                    <td
-                      style={{
-                        padding: "15px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                      }}
-                    >
-                      {item.quantity}
+                    <td style={tdStyle}>
+                      {item.date
+                        ? new Date(item.date).toLocaleDateString()
+                        : "—"}
                     </td>
                   </tr>
                 ))
@@ -284,7 +183,7 @@ export default function Inventory() {
           </Table>
         </ScrollArea>
 
-        {/* Add Product Modal */}
+        {/* Add Product Modal Overlay */}
         {showAddProductModal && (
           <>
             <div
@@ -296,17 +195,9 @@ export default function Inventory() {
                 height: "100vh",
                 backgroundColor: "rgba(0, 0, 0, 0.5)",
                 zIndex: 1000,
-                overflow: "hidden",
               }}
-              role="button"
-              tabIndex={0}
               onClick={closeAddProductModal}
-              onKeyDown={(e) =>
-                (e.key === "Enter" || e.key === " ") && closeAddProductModal()
-              }
-              aria-label="Close Add Product Modal Background"
             />
-
             <div
               style={{
                 position: "fixed",
@@ -316,7 +207,7 @@ export default function Inventory() {
                 width: "80%",
                 maxWidth: "600px",
                 backgroundColor: "#fff",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                 borderRadius: "8px",
                 zIndex: 1001,
                 overflow: "hidden",
@@ -333,18 +224,10 @@ export default function Inventory() {
                   cursor: "pointer",
                 }}
                 onClick={closeAddProductModal}
-                aria-label="Close Modal"
               >
                 X
               </button>
-
-              <div
-                style={{
-                  margin: "-80px 0 -65px 0",
-                  height: "835px",
-                  overflow: "hidden",
-                }}
-              >
+              <div style={{ margin: "20px" }}>
                 <AddProduct
                   onSuccess={closeAddProductModal}
                   selectedDepartment={selectedDepartment}
@@ -356,135 +239,24 @@ export default function Inventory() {
           </>
         )}
 
-        {/* Transfer Product Modal */}
+        {/* Transfer Product Modal Overlay */}
         {showTransferProductModal && (
           <>
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100vw",
-                height: "100vh",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                zIndex: 1000,
-                overflow: "hidden",
-              }}
-              role="button"
-              tabIndex={0}
-              onClick={closeTransferProductModal}
-              onKeyDown={(e) =>
-                (e.key === "Enter" || e.key === " ") &&
-                closeTransferProductModal()
-              }
-              aria-label="Close Transfer Product Modal Background"
-            />
-
-            <div
-              style={{
-                position: "fixed",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "80%",
-                maxWidth: "600px",
-                backgroundColor: "#fff",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                borderRadius: "8px",
-                zIndex: 1001,
-                overflow: "hidden",
-              }}
-            >
-              <button
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  backgroundColor: "transparent",
-                  border: "none",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-                onClick={closeTransferProductModal}
-                aria-label="Close Modal"
-              >
-                X
-              </button>
-
-              <div
-                style={{
-                  margin: "-80px 0 -65px 0",
-                  height: "835px",
-                  overflow: "hidden",
-                }}
-              >
-                <TransferProduct />
-              </div>
+            <div className="modal-backdrop" onClick={closeTransferModal} />
+            <div className="modal-content">
+              <button className="modal-close" onClick={closeTransferModal}>X</button>
+              <TransferProduct closeModal={closeTransferModal} />
             </div>
           </>
         )}
 
-        {/* Request Product Modal (for non-default roles) */}
-        {!isDefaultRole && showRequestProductModal && (
+        {/* Request Product Modal Overlay */}
+        {showRequestProductModal && (
           <>
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100vw",
-                height: "100vh",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                zIndex: 1000,
-                overflow: "hidden",
-              }}
-              role="button"
-              tabIndex={0}
-              onClick={closeRequestProductModal}
-              onKeyDown={(e) =>
-                (e.key === "Enter" || e.key === " ") &&
-                closeRequestProductModal()
-              }
-              aria-label="Close Request Product Modal Background"
-            />
-
-            <div
-              style={{
-                position: "fixed",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "80%",
-                maxWidth: "600px",
-                backgroundColor: "#fff",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                borderRadius: "8px",
-                zIndex: 1001,
-                overflow: "hidden",
-              }}
-            >
-              <button
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  backgroundColor: "transparent",
-                  border: "none",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-                onClick={closeRequestProductModal}
-                aria-label="Close Modal"
-              >
-                X
-              </button>
-
-              <div style={{ margin: "20px" }}>
-                <RequestProduct
-                  closeModal={closeRequestProductModal}
-                  selectedDepartment={selectedDepartment}
-                />
-              </div>
+            <div className="modal-backdrop" onClick={closeRequestModal} />
+            <div className="modal-content">
+              <button className="modal-close" onClick={closeRequestModal}>X</button>
+              <RequestProduct closeModal={closeRequestModal} selectedDepartment={selectedDepartment} />
             </div>
           </>
         )}

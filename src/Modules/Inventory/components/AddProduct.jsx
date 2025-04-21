@@ -7,6 +7,9 @@ function AddProduct({ onSuccess, selectedDepartment, val, name }) {
   const [formData, setFormData] = useState({
     productName: "",
     quantity: "",
+    indent_id: "",
+    specifications: "",
+    date: "",       // ISO yyyy-mm-dd from <input type="date">
   });
 
   const handleChange = (e) => {
@@ -16,21 +19,23 @@ function AddProduct({ onSuccess, selectedDepartment, val, name }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const token = localStorage.getItem("authToken");
-
     if (!token) {
       alert("Please log in to add a product");
       return;
     }
+    // ensure your new fields are non‑empty if required
 
-    if (!formData.productName || !formData.quantity) {
+    console.log("Form data:", formData);
+
+    const { indent_id, productName, quantity, specifications, date } = formData;
+    if (!indent_id || !productName || !quantity || !specifications || !date) {
       alert("Please fill in all the fields");
       return;
     }
 
     try {
-      const response = await fetch(InventoryAdd(`${val}`), {
+      const response = await fetch(InventoryAdd(val), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,8 +43,10 @@ function AddProduct({ onSuccess, selectedDepartment, val, name }) {
         },
         body: JSON.stringify({
           item_name: formData.productName,
-          quantity: parseInt(formData.quantity, 10), // Add radix parameter
-          // department_name: selectedDepartment,
+          quantity: parseInt(formData.quantity, 10),
+          indent_id: formData.indent_id,
+          specifications: formData.specifications,
+          date: formData.date,                // "YYYY-MM-DD"
           [name]: selectedDepartment,
         }),
       });
@@ -47,19 +54,23 @@ function AddProduct({ onSuccess, selectedDepartment, val, name }) {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          `Failed to add product: ${errorData.detail || response.statusText}`,
+          `Failed to add product: ${errorData.detail || response.statusText}`
         );
       }
 
-      const data = await response.json();
-      console.log("Product added:", data);
+      await response.json();
       alert("Product added successfully!");
-      if (onSuccess) {
-        onSuccess();
-      }
+      onSuccess?.();
     } catch (error) {
-      console.error("Error occurred:", error);
-      alert(`Error occurred: ${error.message}`);
+      const errorData = await response.json();
+      console.error("Validation errors:", errorData);
+      alert(
+        "Error adding product:\n" +
+          Object.entries(errorData)
+            .map(([field, errs]) => `${field}: ${errs.join(", ")}`)
+            .join("\n")
+      );
+
     }
   };
 
@@ -67,6 +78,7 @@ function AddProduct({ onSuccess, selectedDepartment, val, name }) {
     <div className="add-product-container">
       <h2>Add New Product</h2>
       <form onSubmit={handleSubmit}>
+        {/* existing fields */}
         <div>
           <label htmlFor="productName">Product Name</label>
           <input
@@ -78,7 +90,6 @@ function AddProduct({ onSuccess, selectedDepartment, val, name }) {
             placeholder="Enter Product Name"
           />
         </div>
-
         <div>
           <label htmlFor="quantity">Quantity</label>
           <input
@@ -88,6 +99,39 @@ function AddProduct({ onSuccess, selectedDepartment, val, name }) {
             value={formData.quantity}
             onChange={handleChange}
             placeholder="Enter Quantity"
+          />
+        </div>
+
+        {/* new fields */}
+        <div>
+          <label htmlFor="indent_id">Indent ID</label>
+          <input
+            type="text"
+            id="indent_id"
+            name="indent_id"
+            value={formData.indent_id}
+            onChange={handleChange}
+            placeholder="Enter Indent ID"
+          />
+        </div>
+        <div>
+          <label htmlFor="specifications">Specifications</label>
+          <textarea
+            id="specifications"
+            name="specifications"
+            value={formData.specifications}
+            onChange={handleChange}
+            placeholder="Enter Specifications"
+          />
+        </div>
+        <div>
+          <label htmlFor="date">Date</label>
+          <input
+            type="date"
+            id="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
           />
         </div>
 
@@ -102,8 +146,8 @@ function AddProduct({ onSuccess, selectedDepartment, val, name }) {
 AddProduct.propTypes = {
   onSuccess: PropTypes.func,
   selectedDepartment: PropTypes.string.isRequired,
-  val: PropTypes.string.isRequired, // Add validation for 'val'
-  name: PropTypes.string.isRequired, // Add validation for 'name'
+  val: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
 };
 
 export default AddProduct;
