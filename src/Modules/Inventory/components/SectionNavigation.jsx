@@ -21,10 +21,9 @@ const sectionComponents = {
 export default function SectionNavigation() {
   const [activeSection, setActiveSection] = useState("Overall Inventory");
   const [activeTab, setActiveTab] = useState("0");
-  const tabsListRef = useRef(null); // Reference for scrollable tabs
+  const tabsListRef = useRef(null);
   const role = useSelector((state) => state.user.role);
 
-  // Define sections based on role
   const sections =
     role === "ps_admin"
       ? ["Overall Inventory", "Section", "Department", "Requests", "Reports"]
@@ -39,32 +38,32 @@ export default function SectionNavigation() {
               : role === "deptadmin_design"
                 ? ["Department"]
                 : role === "Hostel_admin" || role === "hall1caretaker"
-                  ? ["Section"] // Role "hall1caretaker" shows "h1"
+                  ? ["Section"]
                   : role === "hall3caretaker"
-                    ? ["Section"] // Role "hall3caretaker" shows "h3"
+                    ? ["Section"]
                     : role === "hall4caretaker"
-                      ? ["Section"] // Role "hall4caretaker" shows "h4"
+                      ? ["Section"]
                       : role === "phcaretaker"
-                        ? ["Section"] // Role "phcaretaker" shows "panini"
+                        ? ["Section"]
                         : role === "nhcaretaker"
-                          ? ["Section"] // Role "nhcaretaker" shows "nagarjuna"
+                          ? ["Section"]
                           : role === "mshcaretaker"
-                            ? ["Section"] // Role "mshcaretaker" shows "maa saraswati"
+                            ? ["Section"]
                             : role === "rspc_admin"
-                              ? ["Section"] // Role "rspc_admin" shows "rspc"
+                              ? ["Section"]
                               : role === "SectionHead_IWD"
-                                ? ["Section"] // Role "SectionHead_IWD" shows "iwd"
+                                ? ["Section"]
                                 : role === "acadadmin"
-                                  ? ["Section"] // Role "acadadmin" shows "academic"
+                                  ? ["Section"]
                                   : role === "VhCaretaker"
-                                    ? ["Section"] // Role "VhCaretaker" shows "vh"
+                                    ? ["Section"]
                                     : [];
 
   const tabItems = sections.map((section) => ({ title: section }));
 
   const handleTabChange = (tabIndex) => {
     setActiveTab(tabIndex);
-    setActiveSection(sections[+tabIndex]); // Ensure the active section is correctly updated
+    setActiveSection(sections[+tabIndex]);
   };
 
   const handleArrowClick = (direction) => {
@@ -73,7 +72,7 @@ export default function SectionNavigation() {
         ? Math.min(+activeTab + 1, tabItems.length - 1)
         : Math.max(+activeTab - 1, 0);
     setActiveTab(String(newIndex));
-    setActiveSection(sections[newIndex]); // Update active section for arrow navigation
+    setActiveSection(sections[newIndex]);
 
     if (tabsListRef.current) {
       tabsListRef.current.scrollBy({
@@ -110,6 +109,18 @@ export default function SectionNavigation() {
     );
   }
 
+  // For all roles except ps_admin, directly load their page
+  if (role !== "ps_admin") {
+    const directSection = sections[0]; // only one section assigned
+    const DirectComponent = sectionComponents[directSection];
+    return (
+      <div style={{ marginTop: "2rem" }}>
+        {DirectComponent && <DirectComponent />}
+      </div>
+    );
+  }
+
+  // If ps_admin, show the tab navigation
   return (
     <>
       <Flex justify="space-between" align="center" mt="lg">
