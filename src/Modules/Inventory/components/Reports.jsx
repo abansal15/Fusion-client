@@ -31,21 +31,21 @@ const departments = [
 ];
 
 const inventoryData = [
-  { product: "Computer", quantity: 10 },
-  { product: "Oscilloscope", quantity: 5 },
+  { product: "Computer", quantity: 3 },
+  { product: "Oscilloscope", quantity: 3 },
   { product: "Projector", quantity: 3 },
-  { product: "Printer", quantity: 7 },
-  { product: "Desk Chair", quantity: 15 },
-  { product: "Whiteboard", quantity: 4 },
-  { product: "Laptop", quantity: 12 },
-  { product: "Microscope", quantity: 6 },
-  { product: "3D Printer", quantity: 2 },
-  { product: "Tablet", quantity: 8 },
-  { product: "Server Rack", quantity: 3 },
-  { product: "Smart Board", quantity: 5 },
-  { product: "Drone", quantity: 4 },
-  { product: "VR Headset", quantity: 7 },
-  { product: "Robot Kit", quantity: 9 },
+  { product: "Printer", quantity: 3 },
+  { product: "Desk Chair", quantity: 3 },
+  { product: "Whiteboard", quantity: 3 },
+  { product: "Laptop", quantity: 3 },
+  { product: "Microscope", quantity: 3 },
+  { product: "3D Printer", quantity: 3 },
+  { product: "Tablet", quantity: 3 },
+  { product: "Server Rack", quantity: 0 },
+  { product: "Smart Board", quantity: 1 },
+  { product: "Drone", quantity: 0 },
+  { product: "VR Headset", quantity: 0 },
+  { product: "Robot Kit", quantity: 0 },
 ];
 
 const productDetails = {
@@ -326,26 +326,26 @@ export default function InventoryReport() {
         </Text>
       </Group>
 
-      {/* Primary Filter: Search by product name */}
-      <TextInput
-        placeholder="Search by product name"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        style={{ marginBottom: "20px", width: "300px" }}
-      />
+      {/* Replace the individual filter components with this Group */}
+      <Group position="apart" mb="xl" grow>
+        <TextInput
+          placeholder="Search by product name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ marginRight: "20px" }}
+        />
 
-      {/* Secondary Filter: Filter by department */}
-      <Select
-        data={[
-          { value: "", label: "All Departments" },
-          ...departments.map((dept) => ({ value: dept, label: dept })),
-        ]}
-        value={selectedDepartment}
-        onChange={setSelectedDepartment}
-        placeholder="Filter by department"
-        clearable
-        style={{ marginBottom: "20px", width: "300px" }}
-      />
+        <Select
+          data={[
+            { value: "", label: "All Departments" },
+            ...departments.map((dept) => ({ value: dept, label: dept })),
+          ]}
+          value={selectedDepartment}
+          onChange={setSelectedDepartment}
+          placeholder="Filter by department"
+          clearable
+        />
+      </Group>
 
       {/* Main Table Container with ScrollArea */}
       <ScrollArea style={{ height: "70vh", marginBottom: "20px" }}>
